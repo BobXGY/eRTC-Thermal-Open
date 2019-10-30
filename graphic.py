@@ -35,6 +35,7 @@ def save_chart(save_path, data_path, annotate=None):
     )
     plt.grid()
     plt.savefig(save_path)
+    print(save_path)
     plt.close()
 
 
@@ -45,10 +46,10 @@ if __name__ == '__main__':
     cur_path = getcwd()
     filename = argv[1]
 
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    ax.set_xlabel('时间')
-    ax.set_ylabel('温度/°C')
+    # fig = plt.figure()
+    # ax = fig.add_subplot(1, 1, 1)
+    # ax.set_xlabel('time/s')
+    # ax.set_ylabel('temperature/°C')
     if len(argv) == 3:
         if argv[2] == '-r':
             print('实时模式')
@@ -71,5 +72,5 @@ if __name__ == '__main__':
 
     elif len(argv) == 2:
         save_path = getcwd() + '/pic/' + argv[1].split('/')[-1] + '.svg'
+        print('pic saved at ' + save_path)
         save_chart(save_path, argv[1])
-
