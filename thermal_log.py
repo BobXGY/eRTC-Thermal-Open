@@ -5,6 +5,27 @@ from os import path, getcwd, mkdir
 from model import DEVICE_MODEL
 from graphic import save_chart
 
+
+def check_activity_alive():
+    get_activity_cmd = adb_shell.format("dumpsys activity activities | sed -En -e '/Running activities/,/Run #0/p'")
+    get_activity_cmd2 = adb_shell.format("dumpsys activity | grep mFoc")
+    activiy = 'com.yiqizuoye.library.ailesson.AILessonActivity'
+    activiy2 = 'loader.a.ActivityN1STNTS1'
+    exec_obj = subprocess.Popen(get_activity_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    exec_obj2 = subprocess.Popen(get_activity_cmd2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    exec_obj.wait()
+    exec_obj2.wait()
+    while 1:
+        get_line = exec_obj.stdout.readline().decode('utf-8')
+        get_line2 = exec_obj2.stdout.readline().decode('utf-8')
+        if activiy in get_line:
+            return True
+        if activiy2 in get_line2:
+            return True
+        if get_line == '' and get_line2 == '':
+            return False
+
+
 if __name__ == '__main__':
     # 目录存在检查，不存在则创建
     if not path.exists(getcwd() + '/csv'):
@@ -12,10 +33,15 @@ if __name__ == '__main__':
 
     # 参数检查
     if len(argv) == 1:
-        print('----AI lesson温度监控脚本----')
+        print('{:_^80}'.format(''))
+        print('{:^80}'.format('AI lesson thermal monitor'))
+        print('{:.^80}'.format(''))
         print('    用法：')
         print('        python3 thermal_log.py 温度记录文件名 [-c]')
         print('        其中参数-c为可选，效果：activity结束时自动结束温度监控')
+        print('\n`此脚本需要adb并需要为adb正确配置环境变量')
+        print('_' * 80)
+        exit(1)
 
     # 文件名格式化以及路径拼接
     filename = argv[1]
@@ -48,22 +74,10 @@ if __name__ == '__main__':
 
     # 监控activity是否启动
     print('等待activity启动...')
-    activiy = 'com.yiqizuoye.library.ailesson.AILessonActivity'
-    activiyOK = False
     while 1:
-        get_activity_cmd = adb_shell.format("dumpsys activity activities | sed -En -e '/Running activities/,/Run #0/p'")
-        exec_obj = subprocess.Popen(get_activity_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        while 1:
-            get_line = exec_obj.stdout.readline().decode('utf-8')
-            if activiy in get_line:
-                activiyOK = True
-                print('\n已发现：\ncom.yiqizuoye.library.ailesson.AILessonActivity')
-                break
-            if get_line == '':
-                print('\ractivity未启动，等待中...', end='')
-                break
-        if activiyOK:
+        if check_activity_alive():
             break
+        sleep(1)
 
     # 创建文件
     with open(filepath, 'w', encoding='utf  -8') as f:
@@ -82,36 +96,24 @@ if __name__ == '__main__':
         return_code = exec_obj.wait()
 
         if return_code == 0:
-            int_temp = str(int(temp)/1000.0)
-            print('\r当前温度：{:<8} °C'.format(int_temp), end='')
+            fmt_temp = '{:.3f}'.format(int(temp)/1000.0)
+            print('\r当前温度：{:<8} °C'.format(fmt_temp), end='')
             with open(filepath, 'a+', encoding='utf-8') as f:
                 f.write(str(time() - start_time) + ',' + temp + '\n')
         elif 'error: no devices/emulators found' in temp:
             print('\n发生错误，可能是数据线没有插紧')
             print(temp)
-            # 这个continue的目的是避免后面检查activity的命令执行失败误认为activity已退出
             sleep(2)
+            # 这个continue的目的是避免后面检查activity的命令执行失败误认为activity已退出
             continue
 
         # 检查activity是否退出，如果指定了-c参数，activity退出则测温结束
+        activity_alive = True
         if 'c' in argv[-1]:
-            get_activity_cmd = adb_shell.format("dumpsys activity activities | sed -En -e '/Running activities/,/Run #0/p'")
-            exec_obj = subprocess.Popen(get_activity_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            return_code = exec_obj.wait()
-            out = exec_obj.stdout.readlines()
-            if return_code != 0:
-                print('\nactivity 状态获取错误！')
-                continue
-            activiyAlive = False
-            for line in out:
-                if 'com.yiqizuoye.library.ailesson.AILessonActivity' in line.decode('utf-8'):
-                    activiyAlive = True
-                    break
-            if not activiyAlive:
-                for line in out:
-                    print(line.decode('utf-8').replace('\n', ''))
+            if not check_activity_alive():
                 print('\nactivity已退出，程序结束')
                 break
+
         sleep(2)
 
     pic_path = getcwd() + '/pic/' + filename + '.svg'
