@@ -67,3 +67,4 @@ if __name__ == '__main__':
     elif len(argv) == 2:
         save_path = getcwd() + '/pic/' + argv[1].split('/')[-1] + '.svg'
         save_chart(save_path, argv[1])
+
