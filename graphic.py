@@ -19,6 +19,7 @@ def save_chart(save_path, data_path, annotate=None):
     plt.title(title)
     plt.xlabel('{:<40}time/s{:>40} s'.format('', 'Totally:{:.1f}'.format(data['time'].iloc[-1])))
     plt.ylabel('temperature/°C')
+    plt.ylim(32, 65)
     plt.annotate(
         'highest\n{:.1f}°C'.format(highest_point[1]),
         xy=highest_point,
