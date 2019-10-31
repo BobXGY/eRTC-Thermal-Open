@@ -10,7 +10,7 @@ def check_activity_alive():
     get_activity_cmd = adb_shell.format("dumpsys activity activities | sed -En -e '/Running activities/,/Run #0/p'")
     get_activity_cmd2 = adb_shell.format("dumpsys activity | grep mFoc")
     activiy = 'com.yiqizuoye.library.ailesson.AILessonActivity'
-    activiy2 = 'loader.a.ActivityN1STNTS1'
+    activiy2 = 'loader.a.ActivityN1STNTS'
     exec_obj = subprocess.Popen(get_activity_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     exec_obj2 = subprocess.Popen(get_activity_cmd2, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     exec_obj.wait()
@@ -18,12 +18,31 @@ def check_activity_alive():
     while 1:
         get_line = exec_obj.stdout.readline().decode('utf-8')
         get_line2 = exec_obj2.stdout.readline().decode('utf-8')
-        if activiy in get_line:
+        if activiy in get_line or activiy2 in get_line:
             return True
-        if activiy2 in get_line2:
+        if activiy in get_line or activiy2 in get_line2:
             return True
         if get_line == '' and get_line2 == '':
             return False
+
+
+def filename_check(name):
+    """
+    检查当前操作目录下的csv/目录下是否存在同名文件
+    :param name: 文件名
+    :return: 文件绝对路径
+    """
+    # 文件名格式化以及路径拼接
+    filename = name
+    if filename[-4:] != '.csv':
+        filename = filename + '.csv'
+    filepath = getcwd() + '/csv/' + filename
+
+    # 同名文件检查，存在则退出
+    if path.exists(filepath):
+        exit('文件已存在')
+
+    return filepath
 
 
 if __name__ == '__main__':
@@ -36,6 +55,8 @@ if __name__ == '__main__':
         print('{:_^80}'.format(''))
         print('{:^80}'.format('AI lesson thermal monitor'))
         print('{:.^80}'.format(''))
+        print('此脚本可以监控AILesson运行过程中的发热情况并导出csv文件到操作目录下的csv/目录下')
+        print('在adb正确连接手机后启动此脚本')
         print('    用法：')
         print('        python3 thermal_log.py 温度记录文件名 [-c]')
         print('        其中参数-c为可选，效果：activity结束时自动结束温度监控')
@@ -43,15 +64,9 @@ if __name__ == '__main__':
         print('_' * 80)
         exit(1)
 
-    # 文件名格式化以及路径拼接
+    # 文件重名检测并生成输出文件的绝对路径
     filename = argv[1]
-    if filename[-4:] != '.csv':
-        filename = filename + '.csv'
-    filepath = getcwd() + '/csv/' + filename
-
-    # 同名文件检查，存在则退出
-    if path.exists(filepath):
-        exit('文件已存在')
+    filepath = filename_check(filename)
 
     # 机型监测
     adb_shell = 'adb shell {}'

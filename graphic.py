@@ -61,6 +61,14 @@ if __name__ == '__main__':
                 data['thermal'] = data['thermal'] / 1000.0
                 plt.cla()
                 plt.plot(data['time'].values, data['thermal'].values, linewidth=1.0)
+                last_point = (data['time'].values[-1], data['thermal'].values[-1])
+                plt.annotate(
+                    'current:\n{:.1f}°C'.format(last_point[1]),
+                    xy=last_point,
+                    xytext=(last_point[0] + 3, last_point[1]),
+                    bbox=dict(boxstyle="round", fc="w", ec="r"),
+                    arrowprops=dict(arrowstyle="->", connectionstyle="arc"),
+                )
                 print('\r第{}次刷新'.format(count), end='')
                 count += 1
                 plt.show()
