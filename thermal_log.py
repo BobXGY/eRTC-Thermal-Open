@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
     while 1:
         exec_obj = subprocess.Popen(get_thermal_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        temp = exec_obj.stdout.readline().decode('utf-8').replace('\n', '')
+        temp = exec_obj.stdout.readline().decode('utf-8').replace('\n', '').replace('\r', '')
         return_code = exec_obj.wait()
 
         if return_code == 0:
