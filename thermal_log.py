@@ -58,9 +58,10 @@ if __name__ == '__main__':
         print('此脚本可以监控AILesson运行过程中的发热情况并导出csv文件到操作目录下的csv/目录下')
         print('在adb正确连接手机后启动此脚本')
         print('    用法：')
-        print('        python3 thermal_log.py 温度记录文件名 [-c]')
+        print('        python3 thermal_log.py 要生成的温度记录文件名 [-c]')
         print('        其中参数-c为可选，效果：activity结束时自动结束温度监控')
         print('\n`此脚本需要adb并需要为adb正确配置环境变量')
+        print('``保证正确连接一个设备且仅能连接一个目标设备后再启动脚本')
         print('_' * 80)
         exit(1)
 
