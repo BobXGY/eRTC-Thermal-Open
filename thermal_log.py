@@ -7,6 +7,10 @@ from graphic import save_chart
 
 
 def check_activity_alive():
+    """
+    监测activity是否存活
+    :return: 布尔值
+    """
     get_activity_cmd = adb_shell.format("dumpsys activity activities | sed -En -e '/Running activities/,/Run #0/p'")
     get_activity_cmd2 = adb_shell.format("dumpsys activity | grep mFoc")
     activiy = 'com.yiqizuoye.library.ailesson.AILessonActivity'
@@ -107,6 +111,7 @@ if __name__ == '__main__':
     start_time = time()
 
     while 1:
+        # 测温主循环
         exec_obj = subprocess.Popen(get_thermal_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         temp = exec_obj.stdout.readline().decode('utf-8').replace('\n', '').replace('\r', '')
         return_code = exec_obj.wait()

@@ -42,22 +42,21 @@ def save_chart(save_path, data_path, annotate=None):
 
 if __name__ == '__main__':
     if len(argv) < 2:
+        print('用法：')
+        print('    python3 graphic.py csv文件路径 [-r]')
+        print('    参数-r表示实时模式，动态刷新显示最近一分钟的数据')
         exit('参数错误')
 
     cur_path = getcwd()
     filename = argv[1]
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(1, 1, 1)
-    # ax.set_xlabel('time/s')
-    # ax.set_ylabel('temperature/°C')
     if len(argv) == 3:
         if argv[2] == '-r':
             print('实时模式')
             plt.ion()
-            plt.title('最近一分钟内的记录')
             count = 0
             while(1):
+                plt.title('最近一分钟内的记录')
                 data = pd.read_csv(cur_path + '/' + filename).tail(30)
                 data['thermal'] = data['thermal'] / 1000.0
                 plt.cla()
